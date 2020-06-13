@@ -56,7 +56,7 @@ public:
     };
 
     HashTable() {
-        buckets.resize(20);
+        buckets.resize(4);
         // TODO: a default constructor (possibly empty).
 
         // You can use the following to avoid needing to implement rehashing.
@@ -91,14 +91,14 @@ public:
         }
         
         int j = 0;
-        size_t first_erased_index;
+        size_t first_erased_index = 0;
         bool erased_found = false;
         //Move to next empty spot or where key is, whichever is first;
         do {
             desired_bucket = (hash_result + j) % buckets.size();
             ++j;
-            if(buckets[desired_bucket].key == key
-               && buckets[desired_bucket].status == Status::Occupied) {
+            if(buckets[desired_bucket].status == Status::Occupied
+               && buckets[desired_bucket].key == key) {
                 //Not adding element so don't need to ++
                 return buckets[desired_bucket].val;
             }
@@ -107,12 +107,15 @@ public:
                 erased_found = true;
                 
             }
+            if(j > (int)buckets.size()) {
+                break;
+            }
         }
         while(buckets[desired_bucket].status != Status::Empty);
         
         //Couldn't find the key in there, putting in next empty or deleted spot
         if(erased_found) {
-            desired_bucket = erased_found;
+            desired_bucket = first_erased_index;
         }
         V dummy;
 
@@ -142,14 +145,14 @@ public:
             return true;
         }
         int j = 0;
-        size_t first_erased_index;
+        size_t first_erased_index = 0;
         bool erased_found = false;
         //Move to next empty spot or where key is, whichever is first;
         do {
             desired_bucket = (hash_result + j) % buckets.size();
             ++j;
-            if(buckets[desired_bucket].key == key
-               && buckets[desired_bucket].status == Status::Occupied) {
+            if(buckets[desired_bucket].status == Status::Occupied
+               && buckets[desired_bucket].key == key) {
                 //Not adding element so don't need to ++
                 return false;
             }
@@ -158,12 +161,15 @@ public:
                 erased_found = true;
                 
             }
+            if(j > (int)buckets.size()) {
+                break;
+            }
         }
         while(buckets[desired_bucket].status != Status::Empty);
         
             //Couldn't find the key in there, putting in next empty or deleted spot
         if(erased_found) {
-            desired_bucket = erased_found;
+            desired_bucket = first_erased_index;
         }
 
         buckets[desired_bucket].val = val;
@@ -186,12 +192,15 @@ public:
             desired_bucket = (hash_result + j) % buckets.size();
             ++j;
             //Found the element
-            if(buckets[desired_bucket].key == key
-               && buckets[desired_bucket].status == Status::Occupied) {
+            if(buckets[desired_bucket].status == Status::Occupied
+               && buckets[desired_bucket].key == key) {
                 --num_elements;
                 ++num_deleted;
                 buckets[desired_bucket].status = Status::Deleted;
                 return 1;
+            }
+            if(j > (int)buckets.size()) {
+                break;
             }
         }
         while(buckets[desired_bucket].status != Status::Empty);
